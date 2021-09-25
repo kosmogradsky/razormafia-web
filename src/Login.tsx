@@ -1,14 +1,17 @@
+import { getAuth, signInWithEmailAndPassword } from "@firebase/auth";
 import * as React from "react";
 
 export const Login = () => {
-  const [username, setUsername] = React.useState("");
+  const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
   const handleSubmit = React.useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+
+      signInWithEmailAndPassword(getAuth(), email, password);
     },
-    []
+    [email, password]
   );
 
   return (
@@ -16,12 +19,12 @@ export const Login = () => {
       <div style={{ marginBottom: "1rem" }}>Вход в систему</div>
       <form action="" onSubmit={handleSubmit}>
         <label style={{ display: "block", marginBottom: ".5rem" }}>
-          <span>Имя пользователя: </span>
+          <span>Электронная почта: </span>
           <input
             type="text"
-            value={username}
+            value={email}
             onChange={(event) => {
-              setUsername(event.target.value);
+              setEmail(event.target.value);
             }}
           />
         </label>

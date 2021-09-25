@@ -5,6 +5,10 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
   mode: "development",
   devtool: "inline-source-map",
+  entry: {
+    main: "./src/index.tsx",
+    worker: "./src/worker.ts",
+  },
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
     fallback: { process: require.resolve("process/browser") },
@@ -34,11 +38,12 @@ module.exports = {
   },
   devServer: {
     historyApiFallback: true,
-    allowedHosts: "all"
+    allowedHosts: "all",
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: "src/index.html",
+      excludeChunks: ["worker"],
     }),
     new webpack.ProvidePlugin({ process: "process" }),
   ],

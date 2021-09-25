@@ -2,7 +2,7 @@ import * as React from "react";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 
 export const Register = () => {
-  const [username, setUsername] = React.useState("");
+  const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [passwordConfirmation, setPasswordConfirmation] = React.useState("");
 
@@ -11,12 +11,12 @@ export const Register = () => {
       event.preventDefault();
 
       if (password === passwordConfirmation) {
-        createUserWithEmailAndPassword(getAuth(), username, password);
+        createUserWithEmailAndPassword(getAuth(), email, password);
       } else {
         throw new Error("Passwords don't match!");
       }
     },
-    [password, passwordConfirmation, username]
+    [password, passwordConfirmation, email]
   );
 
   return (
@@ -24,12 +24,12 @@ export const Register = () => {
       <div style={{ marginBottom: "1rem" }}>Регистрация</div>
       <form action="" onSubmit={handleSubmit}>
         <label style={{ display: "block", marginBottom: ".5rem" }}>
-          <span>Имя пользователя: </span>
+          <span>Электронная почта: </span>
           <input
             type="text"
-            value={username}
+            value={email}
             onChange={(event) => {
-              setUsername(event.target.value);
+              setEmail(event.target.value);
             }}
           />
         </label>
