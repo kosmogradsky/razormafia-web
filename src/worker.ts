@@ -1,4 +1,8 @@
-console.log("hello from worker");
+import io from "socket.io-client";
+
+const socket = io("ws://localhost:8000", {
+  transports: ["websocket"],
+});
 
 onmessage = async (event) => {
   const readable: ReadableStream = event.data.readable;
@@ -24,8 +28,16 @@ onmessage = async (event) => {
     codedHeight: 480,
   });
 
-  const handleEncodedVideo = (encodedChunk: any, metadata: any) => {
-    decoder.decode(encodedChunk);
+  const handleEncodedVideo = (chunk: any, metadata: any) => {
+    const chunkData = new Uint8Array(chunk.byteLength);
+    chunk.copyTo(chunkData);
+
+    socket.emit("frame to server", {
+      timestamp: chunk.timestamp,
+      type: chunk.type,
+      chunkData,
+    });
+    console.log(chunk, metadata);
   };
   const handleCodecError = (err: any) => {
     console.log("encoder error", err);
@@ -39,8 +51,18 @@ onmessage = async (event) => {
     codec: "vp8",
     width: 640,
     height: 480,
-    bitrate: 2_000_000, // 2 Mbps
+    bitrate: 1_000_000,
     framerate: 30,
+  });
+
+  socket.on("frame to client", (frame) => {
+    // @ts-ignore
+    const chunk = new EncodedVideoChunk({
+      timestamp: frame.timestamp,
+      type: frame.type,
+      data: new Uint8Array(frame.chunkData),
+    });
+    decoder.decode(chunk);
   });
 
   let frameCounter = 0;
