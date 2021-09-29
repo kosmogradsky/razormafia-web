@@ -1,5 +1,5 @@
 import * as React from "react";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { HashRouter, Link, Route, Switch } from "react-router-dom";
 import { GameQueue } from "./GameQueue";
 import { Header } from "./Header";
 import { Login } from "./Login";
@@ -7,8 +7,20 @@ import { Register } from "./Register";
 
 export const Main = () => (
   <>
-    <BrowserRouter>
+    <HashRouter>
       <Header />
+      <Link to="/" style={{ display: "block" }}>
+        /
+      </Link>
+      <Link to="/login" style={{ display: "block" }}>
+        /login
+      </Link>
+      <Link to="/register" style={{ display: "block" }}>
+        /register
+      </Link>
+      <Link to="/videoroom" style={{ display: "block" }}>
+        /videoroom
+      </Link>
 
       <div style={{ paddingTop: "1rem" }}>
         <Switch>
@@ -26,6 +38,6 @@ export const Main = () => (
           </Route>
         </Switch>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   </>
 );

@@ -6,7 +6,7 @@ module.exports = {
   mode: "development",
   devtool: "inline-source-map",
   entry: {
-    main: "./src/index.tsx",
+    renderer: "./src/index.tsx",
     worker: "./src/worker.ts",
   },
   resolve: {
@@ -47,4 +47,7 @@ module.exports = {
     }),
     new webpack.ProvidePlugin({ process: "process" }),
   ],
+  externals: {
+    dgram: "commonjs2 dgram",
+  },
 };

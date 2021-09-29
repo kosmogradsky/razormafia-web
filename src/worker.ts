@@ -1,3 +1,5 @@
+import * as dgram from "dgram";
+
 const socket = new WebSocket("ws://localhost:8000");
 
 const convertSlotToNumber = (slot: string): number => {
@@ -28,6 +30,7 @@ const convertSlotToNumber = (slot: string): number => {
 };
 
 onmessage = (event) => {
+  const dgramSocket = dgram.createSocket("udp4");
   const frameToClientListeners: ((typedArray: Uint8Array) => void)[] = [];
 
   const onVideoroomEntered = async (response: { status: string }) => {
@@ -168,7 +171,7 @@ onmessage = (event) => {
           chunk.byteLength + miscLength + videoroomIdBytes.length
         );
 
-        socket.send(chunkData);
+        dgramSocket.send(chunkData, 3000, "127.0.0.1");
         console.log(chunk, metadata);
       };
 
@@ -210,29 +213,42 @@ onmessage = (event) => {
     }
   };
 
-  socket.onopen = () => {
-    socket.send(
-      JSON.stringify({
-        videoroomId: event.data.videoroomId,
-        slot: event.data.slot,
-        idToken: event.data.idToken,
-      })
-    );
-  };
-
   socket.onmessage = (event) => {
     if (typeof event.data === "string") {
       const response = JSON.parse(event.data);
 
       onVideoroomEntered(response);
-    } else {
-      for (const listener of frameToClientListeners) {
-        event.data.arrayBuffer().then((buffer: ArrayBuffer) => {
-          const typedArray = new Uint8Array(buffer);
-
-          listener(typedArray);
-        });
-      }
     }
   };
+
+  dgramSocket.on("message", (msg) => {
+    for (const listener of frameToClientListeners) {
+      const typedArray = new Uint8Array(msg);
+
+      listener(typedArray);
+    }
+  });
+
+  dgramSocket.bind(undefined, '127.0.0.1', () => {
+    const sendVideoroomRequest = () => {
+      socket.send(
+        JSON.stringify({
+          videoroomId: event.data.videoroomId,
+          slot: event.data.slot,
+          idToken: event.data.idToken,
+          datagramPort: dgramSocket.address().port,
+        })
+      );
+    };
+
+    console.log("dgram address", dgramSocket.address());
+
+    if (socket.readyState === 1) {
+      sendVideoroomRequest();
+    } else {
+      socket.onopen = () => {
+        sendVideoroomRequest();
+      };
+    }
+  });
 };
