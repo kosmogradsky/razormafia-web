@@ -100,8 +100,7 @@ onmessage = (event) => {
             codedHeight: 480,
           });
 
-          console.log("setting up socket listener", currentSlot);
-
+          let hasKeyFrame = false;
           const listener = (typedArray: Uint8Array) => {
             const slotByte = typedArray[typedArray.length - 1];
 
@@ -123,13 +122,19 @@ onmessage = (event) => {
                 timestampPart4;
               const chunkType = chunkTypeByte === 1 ? "delta" : "key";
 
-              // @ts-ignore
-              const chunk = new EncodedVideoChunk({
-                timestamp,
-                type: chunkType,
-                data: typedArray.subarray(0, typedArray.length - 6),
-              });
-              decoder.decode(chunk);
+              if (hasKeyFrame === false && chunkType === "key") {
+                hasKeyFrame = true;
+              }
+
+              if (hasKeyFrame) {
+                // @ts-ignore
+                const chunk = new EncodedVideoChunk({
+                  timestamp,
+                  type: chunkType,
+                  data: typedArray.subarray(0, typedArray.length - 6),
+                });
+                decoder.decode(chunk);
+              }
             }
           };
           frameToClientListeners.push(listener);
@@ -229,7 +234,7 @@ onmessage = (event) => {
     }
   });
 
-  dgramSocket.bind(undefined, '127.0.0.1', () => {
+  dgramSocket.bind(undefined, "127.0.0.1", () => {
     const sendVideoroomRequest = () => {
       socket.send(
         JSON.stringify({

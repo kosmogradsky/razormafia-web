@@ -180,7 +180,7 @@ export const GameQueue = () => {
       case 1: {
         const currentUser = getAuth().currentUser;
         if (currentUser !== null) {
-          const idToken = await getIdToken(currentUser, true);
+          const idToken = await getIdToken(currentUser);
 
           runMediaWorker({
             videoroomId: result.videoroomId,
